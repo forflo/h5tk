@@ -1,55 +1,23 @@
---[[Example of usage:
-	io.write("<!DOCTYPE html>")
-	io.write(h5tk.html{
-		h5tk.head{
-			h5tk.title{
-				"foo",
-				"moo"
-			}
-		},
-		
-		h5tk.body{
-			h5tk.p{
-				style = "bold!"
-			} => <p style="foo">
-			
-			h5tk.table{
-				h5tk.tr{
-					(functon () 
-						local t = {}
-						for i=1,10 do
-							t[i] = htk.th{"foo" .. i}
-						end
-						return t
-					end)
-					h5tk.th{"foo"},
-					h5tk.th{"boo"}
-				},
-				
-				h5tk.tr{
-					h5tk.td{"foo"},
-					h5tk.td{"boo"}
-				}
-			}
-		}
-	})
-]]
+-- config vars
+
+local traverse_aux, traverse_attr, traverse_data
+local get_buffer, buffer_tostring, fastAdd
 
 -- string buffer
-local function get_buffer()
+function get_buffer()
 	return {""}
 end
 
-local function buffer_tostring(buffer)
+function buffer_tostring(buffer)
 	return table.concat(buffer)
 end
 
-local function fastAdd(buffer, string)
+function fastAdd(buffer, string)
 	buffer[#buffer + 1] = string
 end
 
 -- ausillary table traversal function
-local function traverse_aux(value)
+function traverse_aux(value)
 	if not value then
 		return ""
 	end
@@ -77,7 +45,7 @@ local function traverse_aux(value)
 end
 
 -- queries all 
-local function traverse_data(table)
+function traverse_data(table)
 	local data = get_buffer()
 
 	for k, v in pairs(table) do
@@ -90,7 +58,7 @@ local function traverse_data(table)
 end
 
 -- queries all values with string keys
-local function traverse_attr(table)
+function traverse_attr(table)
 	local attr = get_buffer()
 
 	for k, v in pairs(table) do
@@ -103,8 +71,8 @@ local function traverse_attr(table)
 	return buffer_tostring(attr)
 end
 
--- create instance
-local h5tk = {getbuf = get_buffer, fastAdd = fastAdd, buftostring = buffer_tostring}
+
+local h5tk = {}
 -- meta table
 local meta = {
 	-- gets called if h5tk is accessed by a string key
