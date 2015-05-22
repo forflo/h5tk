@@ -24,7 +24,7 @@ With h5tk it's as simple as the following snippet:
             }
         }
 
-		This would genreate the following code:
+This would genreate the following code:
 		
 		<table>
 			<tr>
