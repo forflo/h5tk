@@ -40,4 +40,19 @@ io.write(h5tk.html{
 		}
 	}
 })
+io.write("\n\n\n")
 
+io.write(h5tk.tr{
+	someattr = "someval",
+	(function() return h5tk.td{"funcgenfoo0"} end),
+	h5tk.td{true, false},
+	true, false, true, true,
+	{"nested1", "nested2", {"snest23", "foooooo"}},
+	h5tk.td{"foo1"},
+	h5tk.td{"foo2"},
+	h5tk.td{"foo3"},
+})
+
+
+
+io.write("\n\n\n")

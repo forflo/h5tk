@@ -18,7 +18,7 @@ end
 
 -- ausillary table traversal function
 function traverse_aux(value)
-	if not value then
+	if value == nil then
 		return ""
 	end
 	
