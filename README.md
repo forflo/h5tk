@@ -4,6 +4,8 @@ This module can be used to generate html5 code.
 It is very similar to the erector framework
 (http://erector.rubyforge.org/).
 
+# Example
+## Basic table generation
 Just imagine you would want to emit html code
 that represents a table. 
 With h5tk it's as simple as the following snippet:
@@ -35,7 +37,10 @@ This would genreate the following code:
 			</tr>
 		</table>
 
+## Full example
 For a more complex example, consider this:
+	
+		local h5tk = require[[h5tk]]
 
 		io.write("<!DOCTYPE html>")
 		io.write(h5tk.html{
@@ -79,4 +84,29 @@ For a more complex example, consider this:
 		})
 
 The code above emits a valid html5 page and _could_ be used
-as cgi script for dynamic webcontent.
+as cgi script for dynamic webcontent. Here is the generated output:
+
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<style>table, th, td { border: 1px solid black; }</style>
+	<title>Geiler Titel!!</title>
+	</head>
+	<body>
+	<p style=bold!></p>
+	<table>
+	<tr>
+	<th>foo1</th>
+	<th>foo2</th>
+	<th>foo</th>
+	<th>boo</th>
+	</tr>
+	<tr>
+	<td>foo1</td>
+	<td>foo2</th>
+	<td>boo3</th>
+	<td>boo4</td>
+	</tr>
+	</table>
+	</body>
+	</html>
