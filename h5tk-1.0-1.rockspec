@@ -1,7 +1,8 @@
 package = "h5tk"
 version = "1.0-1"
 source = {
-	url = ""
+	url = "https://github.com/forflo/h5tk",
+	tag = "v1.0"
 }
 
 description = {
