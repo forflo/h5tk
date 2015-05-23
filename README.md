@@ -157,8 +157,15 @@ Lets put some more data in our table.
 	h5tk.tr{someattr = "attrvalue",
 		(function () return h5tr.td{"funcgenfoo"} end),
 		h5tr.td{true},
-		{}
+		{"nested1", "nested2", {"subnested1", "foonested2"}},
 		"<td>foo1</td>", 
 		"<td>foo2</td>", 
 		"<td>boo3</td>",  
-		"<td>boo4</td>"}
+		"<td>boo4</td>"
+	}
+	
+Lets tackle that step-by-step
+* The function gets evaluated and calls h5tr.td... which, in turn generates a string that'll be put into the table
+* Pure boolean values will be interpreted as "true" for true and "false" for false
+* Sub-tables will act, as if they were not present, meaning that the contained strings or values
+  will be put directly into the table that h5tr.tr gets
