@@ -17,6 +17,17 @@ the current html tag. Every value whose key is of type number
 is considered to be the data that should be enclosed between 
 the specified html tags.
 
+h5tk can be used to produce unformatted and formatted html markup.
+In formatting mode, the number of intendation spaces can be adjusted. 
+
+## Initialization
+
+	local h5tk = require[[h5tk]].init(true, 4)
+	-- init accepts two arguments, the first should be
+	-- of type bool, the other of type number.
+	-- The first argument toggles formatting of the html code
+	-- The number represents the intendation spaces per nesting level
+
 ## Basic workings
 
 	h5tk.tr{
