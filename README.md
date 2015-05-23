@@ -75,8 +75,8 @@ For a more complex example, consider this:
 					
 					h5tk.tr{
 						h5tk.td{"foo1"},
-						h5tk.th{"foo2"},
-						h5tk.th{"boo3"},
+						h5tk.td{"foo2"},
+						h5tk.td{"boo3"},
 						h5tk.td{"boo4"}
 					}
 				}
@@ -110,3 +110,55 @@ as cgi script for dynamic webcontent. Here is the generated output:
 	</table>
 	</body>
 	</html>
+
+## Usage
+All Functions take one table as input. Each value whose
+key is of type string is interpreted as an attribute for
+the current html tag. Every value whose key is of type number
+is considered to be the data that should be enclosed between 
+the specified html tags.
+
+### Basic workings
+
+	h5tk.tr{
+		someattr = "attrvalue"
+		h5tk.td{"foo1"},
+		h5tk.td{"foo2"},
+		h5tk.td{"boo3"},
+		h5tk.td{"boo4"}
+	}
+	
+After the first evaluation step, the table that h5tk.tr gets would
+look like this
+
+	h5tk.tr{someattr = "attrvalue", 
+		"<td>foo1</td>", 
+		"<td>foo2</td>", 
+		"<td>boo3</td>", 
+		"<td>boo4</td>"}
+		
+Now, since someattr is a string key, the call to h5tk.tr produces the
+following code:
+
+	<tr someattr="attrvalue">
+	<td>foo1</td>
+	<td>foo2</th>
+	<td>boo3</th>
+	<td>boo4</td>
+	</tr>
+	
+This also works if you don't put all attrname = "attrvalue" pairs
+on top of you table.
+
+		
+### Function evaluation
+Lets put some more data in our table.
+
+	h5tk.tr{someattr = "attrvalue",
+		(function () return h5tr.td{"funcgenfoo"} end),
+		h5tr.td{true},
+		{}
+		"<td>foo1</td>", 
+		"<td>foo2</td>", 
+		"<td>boo3</td>",  
+		"<td>boo4</td>"}
