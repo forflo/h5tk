@@ -1,7 +1,7 @@
 # h5tk
 
 This module can be used to generate html5 code.
-It is very similar to the erector frameworg 
+It is very similar to the erector framework
 (http://erector.rubyforge.org/).
 
 Just imagine you would want to emit html code
@@ -10,8 +10,8 @@ With h5tk it's as simple as the following snippet:
 
 	    h5tk.table{
             h5tk.tr{
-				h5tk.th{"First"},
-				h5tk.th{"Second"},
+			h5tk.th{"First"},
+			h5tk.th{"Second"},
                 h5tk.th{"3"},
                 h5tk.th{"4"}
             },
@@ -78,5 +78,5 @@ For a more complex example, consider this:
 			}
 		})
 
-The above code emits a valid html5 page and could be used
+The code above emits a valid html5 page and _could_ be used
 as cgi script for dynamic webcontent.
