@@ -1,7 +1,7 @@
-h5tk = loadfile("../h5tk.lua")()
+h5tk = loadfile("../h5tk.lua")().init(true, 4)
 
-io.write("<!DOCTYPE html>")
-io.write(h5tk.html{
+io.write("<!DOCTYPE html>\n")
+io.write(h5tk.emit(h5tk.html{
 	h5tk.head{
 		h5tk.style{
 			"table, th, td { border: 1px solid black; }"
@@ -21,11 +21,7 @@ io.write(h5tk.html{
 		h5tk.table{
 			h5tk.tr{
 				(function () 
-					local t = {}
-					for i=1,2 do
-						t[i] = h5tk.th{"foo" .. i}
-					end
-					return t
+					return h5tk.th{"foo" }
 				end),
 				h5tk.th{"foo"},
 				h5tk.th{"boo"}
@@ -39,20 +35,47 @@ io.write(h5tk.html{
 			}
 		}
 	}
-})
-io.write("\n\n\n")
+}))
+io.write("\n")
 
-io.write(h5tk.tr{
-	someattr = "someval",
-	(function() return h5tk.td{"funcgenfoo0"} end),
-	h5tk.td{true, false},
-	true, false, true, true,
-	{"nested1", "nested2", {"snest23", "foooooo"}},
-	h5tk.td{"foo1"},
-	h5tk.td{"foo2"},
-	h5tk.td{"foo3"},
-})
+io.write(h5tk.emit(
+	h5tk.tr{
+		h5tk.th{
+			"foo",
+			"bar"
+		}
+}))
 
+io.write("\n")
 
+io.write(h5tk.emit(
+	h5tk.tr{
+		someatt = "someval",
+		someattr = {"foo", "bar"},
+		(function() return h5tk.td{"funcgenfoo0"} end),
+		h5tk.td{true, false},
+		true, false, true, true,
+		{"nested1", "nested2", {"snest23", "foooooo"}},
+		h5tk.td{"foo1"},
+		h5tk.td{"foo2"},
+		h5tk.td{"foo3"},
+	}
+))
 
-io.write("\n\n\n")
+io.write("\n")
+
+h5tk = loadfile("../h5tk.lua")().init(false)
+
+io.write(
+	h5tk.tr{
+		someatt = "someval",
+		someattr = {"foo", "bar"},
+		(function() return h5tk.td{"funcgenfoo0"} end),
+		h5tk.td{true, false},
+		true, false, true, true,
+		{"nested1", "nested2", {"snest23", "foooooo"}},
+		h5tk.td{"foo1"},
+		h5tk.td{"foo2"},
+		h5tk.td{"foo3"},
+	}
+)
