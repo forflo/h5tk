@@ -2,14 +2,14 @@ package = "h5tk"
 version = "1.0-1"
 source = {
 	url = "https://github.com/forflo/h5tk",
-	tag = "v1.0"
+	tag = "v2.0"
 }
 
 description = {
 	summary = "H5tk - An erector like html5 code generation toolkit for lua",
 	detailed = [[
-		This module can be used to generate html5 code.
-		It is very similar to the erector frameworg 
+		This module can be used to generate (formatted and unformatted) html5 code.
+		It is very similar to the erector framework:
 		(http://erector.rubyforge.org/).
 
 		Just imagine you would want to emit html code
