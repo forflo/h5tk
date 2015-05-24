@@ -1,7 +1,7 @@
 package = "h5tk"
 version = "1.0-1"
 source = {
-	url = "https://github.com/forflo/h5tk",
+	url = "git://github.com/forflo/h5tk",
 	tag = "v2.0"
 }
 
@@ -94,7 +94,7 @@ description = {
 }
 
 dependencies = {
-	"lua ~> 5.1"
+	"lua ~> 5"
 }
 
 build = {
