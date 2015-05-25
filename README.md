@@ -126,3 +126,32 @@ Lets tackle this step-by-step!
 		false
 		42
 	</tr>
+
+## Notes
+### Special tags
+Some HTML5-tags have the following syntax:
+
+	<tagname attr="attrval" moreattr="attrval" ...>
+
+Which means, as you can see, that they don't have an end-tag, 
+and don't enclose text data. h5tk handles these tags correctly.
+For example:
+
+	h5tk.img{src = "foo.bar.com"}
+	-- creates without and end tag:
+	<img src="foo.bar.com">
+	
+This is also true for every other tag that acts like this.
+
+### Boolean attributes
+The dialog tag can have an boolean attribute which is
+commonly denoted as:
+
+	<dialog open> ...
+
+While you can't express this with h5tk,
+
+	<dialog open="">
+
+means the same thing, which, in fact, you can produce very
+easily. This behaviour will change, though.
