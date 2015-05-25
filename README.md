@@ -1,11 +1,10 @@
 # h5tk
 
 This module can be used to generate HTML5 code.
-It is very similar to the erector framework
-(http://erector.rubyforge.org/).
+It is very similar to the [erector](http://erector.rubyforge.org/) framework.
 
 # Installation
-It's on luarocks! => https://luarocks.org/modules/forflo/h5tk
+It's on [luarocks](https://luarocks.org/modules/forflo/h5tk)!
 Just execute
 
     $ sudo luarocks install h5tk
