@@ -42,6 +42,9 @@ io.write(h5tk.emit(
 		{"2nested1", {"2nested2", {"2nested3", {"2nested4"}}}},
 		h5tk.td{"foo1"},
 		h5tk.td{"foo2"},
+		h5tk.img{src = "foo.bra.com"},
+		h5tk.area{fuck = "you"},
+		h5tk.input{Foo = "bar"},
 		h5tk.td{"foo3"},
 		h5tk.html{
 			h5tk.head{

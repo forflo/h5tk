@@ -3,6 +3,9 @@ local this_format = true
 local this_num_sep = 2
 local this_use_tabs = false
 
+local err_wrong_tag = "Wrong tag has been given!"
+local err_twice_tag = "This bug could not have happened, please report it!"
+
 local fast_traverse_aux, fast_traverse_attr, fast_traverse_data
 local fmt_traverse_attr, fmt_traverse_data, fmt_traverse_aux_data
 local fmt_traverse_aux_attr, fmt_add_sep
@@ -10,6 +13,21 @@ local buffer_get, buffer_tostring, buffer_add
 local emit, init
 local tree_addnode, tree_collapse, tree_add_name
 local tree_get 
+local is_html_normal, is_html_special
+local fmt_helper, fast_helper
+
+local html_elements_special = {
+	" area base br col embed track hr source param meta img link keygen input ",
+}
+
+local html_elements_normal = {
+	" a abbr address article aside audio b bdi bdo blockquote body button canvas caption ",
+	" code colgroup datalist dd del	details dfn dialog div dl dt em fieldset figcaption ",
+	" figure footer form h1 h2 h3 h4 h5 h6 head header html i iframe ins kbd label legend ",
+	" li main map mark menu menuitem meter nav noscript object ol optgroup option output ",
+	" p pre progress q rp rt ruby s samp script section select small span styl sub summary ",
+	" sup table tbody td textarea tfoot th thead time title tr u ul var video wbr ",
+}
 
 -- string buffer
 function buffer_get()
@@ -26,6 +44,23 @@ end
 
 function tree_get()
 	return {}
+end
+
+function is_html_normal(string)
+	for i=1,#html_elements_normal do
+		if string.find(html_elements_normal[i], " " .. string .. " ") then
+			return true
+		end
+	end
+	return false
+end
+
+function is_html_special(string)
+	if string.find(html_elements_special[1], " " .. string .. " ") then
+		return true
+	else
+		return false
+	end	
 end
 
 function tree_collapse(lvl, tree)
@@ -225,6 +260,44 @@ function fmt_traverse_data(source)
 	return tree
 end
 
+function fmt_helper(tab, sub, html)
+	local tree = tree_get()
+	local n, s = is_html_normal(sub), is_html_special(sub)
+	setmetatable(tree, {"h5tk"})
+
+	if not s and not n then error(err_wrong_tag) end
+	if s and n then error(err_twice_tag) end
+	
+	tree_addnode(tree, "<" .. sub .. fmt_traverse_attr(html) .. ">")
+	-- only the tags listed in html_elements_normal can
+	-- contain content and have an end tag
+	if n then
+		tree_addnode(tree, fmt_traverse_data(html))
+		tree_addnode(tree, "</" .. sub .. ">")
+	end
+
+	return tree
+end
+
+function fast_helper(tab, sub, html)
+	local buf = buffer_get()
+	local n, s = is_html_normal(sub), is_html_special(sub)
+
+	if not s and not n then error(err_wrong_tag) end
+	if s and n then error(err_twice_tag) end
+
+	buffer_add(buf, "<" .. sub)
+	buffer_add(buf, fast_traverse_attr(html))
+	buffer_add(buf, ">")
+
+	if n then
+		buffer_add(buf, fast_traverse_data(html))
+		buffer_add(buf, "</" .. sub .. ">")
+	end
+
+	return buffer_tostring(buf)					
+end
+
 function init(format, n_spaces, tabs)
 	local meta = { __index = nil}
 
@@ -233,41 +306,19 @@ function init(format, n_spaces, tabs)
 	if type(tabs) == "boolean" then this_use_tabs = tabs end
 
 	if format == true then
-		-- meta table for package instance
-		-- gets called if h5tk is accessed by a string key
 		meta.__index = function(tab, sub)
-			-- slower version. Correct formatting
 			return function(html)
-				local tree = tree_get()
-				setmetatable(tree, {"h5tk"})
-
-				tree_addnode(tree, "<" .. sub .. fmt_traverse_attr(html) .. ">")
-				tree_addnode(tree, fmt_traverse_data(html))
-				tree_addnode(tree, "</" .. sub .. ">")
-			
-				return tree
+				return fmt_helper(tab, sub, html)
 			end
 		end
 	else
-		-- meta table for package instance
 		meta.__index = function(tab, sub)
-			-- gets called if h5tk is accessed by a string key
 			return function(html)
-				-- fast html generation
-				local buf = buffer_get()
-		
-				buffer_add(buf, "<" .. sub)
-				buffer_add(buf, fast_traverse_attr(html))
-				buffer_add(buf, ">")
-				buffer_add(buf, fast_traverse_data(html))
-				buffer_add(buf, "</" .. sub .. ">")
-		
-				return buffer_tostring(buf)					
+				return fast_helper(tag, sub, html)
 			end
 		end
 	end
 
-	-- build package instance
 	local h5tk = {
 		emit = emit, 
 		spaces = this_num_sep, 
