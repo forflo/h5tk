@@ -1,4 +1,4 @@
-h5tk = loadfile("../h5tk.lua")().init(true, 4, false)
+local h5tk = loadfile("../h5tk.lua")().init(true, 4, false)
 
 io.write(h5tk.emit(
 	h5tk.tr{
@@ -73,3 +73,11 @@ io.write(h5tk.emit(
 		}
 	}
 ))
+
+local h5tk = loadfile("../h5tk.lua")().init()
+
+io.write(h5tk.emit(h5tk.html{
+	h5tk.table{
+		h5tk.style{"foo"}
+	}
+}))

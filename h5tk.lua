@@ -1,20 +1,19 @@
--- config vars for init
+-- configuration variables and standards
 local this_format = true
-local this_num_sep = 2
+local this_num_sep = 4
 local this_use_tabs = false
 
 local err_wrong_tag = "Wrong tag has been given!"
 local err_twice_tag = "This bug could not have happened, please report it!"
 
-local fast_traverse_aux, fast_traverse_attr, fast_traverse_data
-local fmt_traverse_attr, fmt_traverse_data, fmt_traverse_aux_data
-local fmt_traverse_aux_attr, fmt_add_sep
 local buffer_get, buffer_tostring, buffer_add
-local emit, init
-local tree_addnode, tree_collapse, tree_add_name
-local tree_get 
+local tree_get, tree_addnode, tree_collapse, tree_add_name
 local is_html_normal, is_html_special
+local fmt_traverse_attr, fmt_traverse_data
+local fmt_traverse_aux_data, fmt_traverse_aux_attr, fmt_add_sep
+local fast_traverse_aux, fast_traverse_attr, fast_traverse_data
 local fmt_helper, fast_helper
+local emit, init
 
 local html_elements_special = {
 	" area base br col embed track hr source param meta img link keygen input ",
@@ -25,7 +24,7 @@ local html_elements_normal = {
 	" code colgroup datalist dd del	details dfn dialog div dl dt em fieldset figcaption ",
 	" figure footer form h1 h2 h3 h4 h5 h6 head header html i iframe ins kbd label legend ",
 	" li main map mark menu menuitem meter nav noscript object ol optgroup option output ",
-	" p pre progress q rp rt ruby s samp script section select small span styl sub summary ",
+	" p pre progress q rp rt ruby s samp script section select small span style sub summary ",
 	" sup table tbody td textarea tfoot th thead time title tr u ul var video wbr ",
 }
 
@@ -84,12 +83,6 @@ end
 
 function tree_addnode(tree, value)
 	tree[#tree + 1] = value
-end
-
-function tree_add_name(tree, name, value)
-	if not (tree[name] == nil) then
-		tree[name] = value
-	end
 end
 
 function fmt_add_sep(lvl, string)
@@ -178,6 +171,24 @@ function fmt_traverse_attr(tree)
 	return buffer_tostring(attr)
 end
 
+function fmt_traverse_data(source)
+	local tree = tree_get()
+
+	for k, v in pairs(source) do
+		if type(k) == "number" then
+			if type(v) == "table" and getmetatable(v) ~= nil then
+				-- no traversal needed because it's the result of
+				-- a h5tk function
+				tree_addnode(tree, v)
+			else
+				tree_addnode(tree, fmt_traverse_aux_data(v))
+			end
+		end
+	end
+
+	return tree
+end
+
 -- ausillary table traversal function
 function fast_traverse_aux(value)
 	if value == nil then
@@ -234,39 +245,13 @@ function fast_traverse_attr(table)
 	return buffer_tostring(attr)
 end
 
-function emit(tree)
-	if this_format then
-		return tree_collapse(0, tree)
-	else
-		return tree
-	end
-end
-
-function fmt_traverse_data(source)
-	local tree = tree_get()
-
-	for k, v in pairs(source) do
-		if type(k) == "number" then
-			if type(v) == "table" and getmetatable(v) ~= nil then
-				-- no traversal needed because it's the result of
-				-- a h5tk function
-				tree_addnode(tree, v)
-			else
-				tree_addnode(tree, fmt_traverse_aux_data(v))
-			end
-		end
-	end
-
-	return tree
-end
-
 function fmt_helper(tab, sub, html)
 	local tree = tree_get()
 	local n, s = is_html_normal(sub), is_html_special(sub)
 	setmetatable(tree, {"h5tk"})
 
-	if not s and not n then error(err_wrong_tag) end
-	if s and n then error(err_twice_tag) end
+	if not s and not n then error(err_wrong_tag .. " " .. sub) end
+	if s and n then error(err_twice_tag .. " " .. sub) end
 	
 	tree_addnode(tree, "<" .. sub .. fmt_traverse_attr(html) .. ">")
 	-- only the tags listed in html_elements_normal can
@@ -283,8 +268,8 @@ function fast_helper(tab, sub, html)
 	local buf = buffer_get()
 	local n, s = is_html_normal(sub), is_html_special(sub)
 
-	if not s and not n then error(err_wrong_tag) end
-	if s and n then error(err_twice_tag) end
+	if not s and not n then error(err_wrong_tag .. " " .. sub) end
+	if s and n then error(err_twice_tag .. " " .. sub) end
 
 	buffer_add(buf, "<" .. sub)
 	buffer_add(buf, fast_traverse_attr(html))
@@ -298,6 +283,14 @@ function fast_helper(tab, sub, html)
 	return buffer_tostring(buf)					
 end
 
+function emit(tree)
+	if this_format then
+		return tree_collapse(0, tree)
+	else
+		return tree
+	end
+end
+
 function init(format, n_spaces, tabs)
 	local meta = { __index = nil}
 
@@ -305,7 +298,8 @@ function init(format, n_spaces, tabs)
 	if type(n_spaces) == "number" then this_num_sep = n_spaces end
 	if type(tabs) == "boolean" then this_use_tabs = tabs end
 
-	if format == true then
+
+	if this_format == true then
 		meta.__index = function(tab, sub)
 			return function(html)
 				return fmt_helper(tab, sub, html)
@@ -322,8 +316,8 @@ function init(format, n_spaces, tabs)
 	local h5tk = {
 		emit = emit, 
 		spaces = this_num_sep, 
-		format = format_format,
-		tabs = this_use_tabs
+		format = this_format,
+		tabs = this_use_tabs,
 	}
 
 	setmetatable(h5tk, meta)
