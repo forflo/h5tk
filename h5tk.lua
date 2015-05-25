@@ -1,10 +1,15 @@
--- config vars
+-- config vars for init
 local this_format = true
-local this_num_spaces = 2
+local this_num_sep = 2
+local this_use_tabs = false
 
 local fast_traverse_aux, fast_traverse_attr, fast_traverse_data
-local fmt_traverse_attr, fmt_traverse_data, fmt_traverse_aux_data, fmt_traverse_aux_attr
-local buffer_get, tree_get, buffer_tostring, tree_addnode, emit, init, tree_collapse
+local fmt_traverse_attr, fmt_traverse_data, fmt_traverse_aux_data
+local fmt_traverse_aux_attr, fmt_add_sep
+local buffer_get, buffer_tostring, buffer_add
+local emit, init
+local tree_addnode, tree_collapse, tree_add_name
+local tree_get 
 
 -- string buffer
 function buffer_get()
@@ -25,11 +30,17 @@ end
 
 function tree_collapse(lvl, tree)
 	local bigbuf = buffer_get()
+	local meta = getmetatable(tree)
+
 	for _, v in pairs(tree) do
 		if type(v) == "table" then
-			buffer_add(bigbuf, tree_collapse(lvl + 1, v))
+			if meta == nil then
+				buffer_add(bigbuf, tree_collapse(lvl, v))
+			else
+				buffer_add(bigbuf, tree_collapse(lvl + 1, v))
+			end
 		else
-			buffer_add(bigbuf, fmt_add_spaces(lvl, v) .. "\n")
+			buffer_add(bigbuf, fmt_add_sep(lvl, v) .. "\n")
 		end
 	end
 
@@ -40,17 +51,27 @@ function tree_addnode(tree, value)
 	tree[#tree + 1] = value
 end
 
-function fmt_add_spaces(lvl, string)
+function tree_add_name(tree, name, value)
+	if not (tree[name] == nil) then
+		tree[name] = value
+	end
+end
+
+function fmt_add_sep(lvl, string)
 	local buf = buffer_get()
-	for i=1,lvl*this_num_spaces do
-		--print(lvl*this_num_spaces)
-		buffer_add(buf, " ")
+	local sep = " "
+	if this_use_tabs then sep = "\t" end
+
+	for i=1,lvl*this_num_sep do
+		buffer_add(buf, sep)
 	end
 	buffer_add(buf, string)
 	return buffer_tostring(buf)
 end
 
 -- auxillary table traversal function
+-- returns either a scalar type or a 
+-- table
 function fmt_traverse_aux_data(tree)
 	if tree == nil then
 		return ""
@@ -59,15 +80,11 @@ function fmt_traverse_aux_data(tree)
 	if type(tree) == "string" then
 		return tree
 	elseif type(tree) == "table" then
-		local res = tree_get()
-		for _, v in pairs(tree) do
-			tree_addnode(res, fmt_traverse_aux_data( v))
-		end
-		return res
+		return fmt_traverse_data(tree)
 	elseif type(tree) == "number" then
 		return tostring(tree)
 	elseif type(tree) == "function" then
-		return fmt_traverse_aux_data(tree())
+		return fmt_traverse_data({tree()})
 	elseif type(tree) == "boolean" then
 		return tostring(tree)
 	elseif type(tree) == "nil" then
@@ -79,6 +96,8 @@ function fmt_traverse_aux_data(tree)
 	end
 end
 
+-- collapses every table or evaluable function
+-- to a single string
 function fmt_traverse_aux_attr(tree)
 	if tree == nil then
 		return ""
@@ -107,7 +126,9 @@ function fmt_traverse_aux_attr(tree)
 	end
 end
 
--- queries all values with string keys
+-- queries all values with string keys and
+-- folds the together to one single string
+-- using fmt_traverse_aux_attr
 function fmt_traverse_attr(tree)
 	local attr = buffer_get()
 
@@ -186,11 +207,30 @@ function emit(tree)
 	end
 end
 
-function init(format, n_spaces)
+function fmt_traverse_data(source)
+	local tree = tree_get()
+
+	for k, v in pairs(source) do
+		if type(k) == "number" then
+			if type(v) == "table" and getmetatable(v) ~= nil then
+				-- no traversal needed because it's the result of
+				-- a h5tk function
+				tree_addnode(tree, v)
+			else
+				tree_addnode(tree, fmt_traverse_aux_data(v))
+			end
+		end
+	end
+
+	return tree
+end
+
+function init(format, n_spaces, tabs)
 	local meta = { __index = nil}
 
 	if type(format) == "boolean" then this_format = format end
-	if type(n_spaces) == "number" then this_num_spaces = n_spaces end
+	if type(n_spaces) == "number" then this_num_sep = n_spaces end
+	if type(tabs) == "boolean" then this_use_tabs = tabs end
 
 	if format == true then
 		-- meta table for package instance
@@ -199,19 +239,10 @@ function init(format, n_spaces)
 			-- slower version. Correct formatting
 			return function(html)
 				local tree = tree_get()
-			
+				setmetatable(tree, {"h5tk"})
+
 				tree_addnode(tree, "<" .. sub .. fmt_traverse_attr(html) .. ">")
-				for k, v in pairs(html) do
-					if type(k) == "number" then
-						-- enclose every non evaluatable value in a table
-						-- this increments the intendation level (see tree_collapse()
-						if type(v) ~= "table" and type(v) ~= "function" then
-							tree_addnode(tree, {fmt_traverse_aux_data(v)})	
-						else
-							tree_addnode(tree, fmt_traverse_aux_data(v))
-						end
-					end
-				end
+				tree_addnode(tree, fmt_traverse_data(html))
 				tree_addnode(tree, "</" .. sub .. ">")
 			
 				return tree
@@ -239,8 +270,9 @@ function init(format, n_spaces)
 	-- build package instance
 	local h5tk = {
 		emit = emit, 
-		spaces = this_num_spaces, 
-		format = format
+		spaces = this_num_sep, 
+		format = format_format,
+		tabs = this_use_tabs
 	}
 
 	setmetatable(h5tk, meta)
