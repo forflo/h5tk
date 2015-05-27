@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="H5tk : H5tk - An erector like html5 code generation toolkit for lua">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>H5tk</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/forflo/h5tk">View on GitHub</a>
+
+          <h1 id="project_title">H5tk</h1>
+          <h2 id="project_tagline">H5tk - An erector like html5 code generation toolkit for lua</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/forflo/h5tk/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/forflo/h5tk/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="h5tk" class="anchor" href="#h5tk" aria-hidden="true"><span class="octicon octicon-link"></span></a>h5tk</h1>
+
+<p>This module can be used to generate HTML5 code.
+It is very similar to the <a href="http://erector.rubyforge.org/">erector</a> framework.</p>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>It's on <a href="https://luarocks.org/modules/forflo/h5tk">luarocks</a>!
+Just execute</p>
+
+<pre><code>$ sudo luarocks install h5tk
+</code></pre>
+
+<h1>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h1>
+
+<p>All functions take a table as input. Each value whose
+key is of type string is interpreted as an attribute for
+the current html tag. Every value whose key is of type number
+is considered to be a part of the data 
+that should be enclosed between the specified html tags.</p>
+
+<p>h5tk can be used to produce unformatted and formatted html markup.
+In formatting mode, the number of intendation spaces can be adjusted.
+The toolkit even allows you to use tabs instead of spaces!</p>
+
+<h2>
+<a id="initialization" class="anchor" href="#initialization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Initialization</h2>
+
+<p>Without further ado, consider the code below.</p>
+
+<pre><code>local builder = require("h5tk")
+html_builder1 = builder(format, indent, use_tabs)
+html_builder2 = builder(true, 4, false)
+html_builder3 = builder(false)
+</code></pre>
+
+<p><em>format</em> toggles formatting of the html code (must be a boolean)
+<em>indent</em> specifies the number of spaces (or tabs) used for each
+    indentation level (must be a number)
+<em>use_tabs</em> switches the indentation character (must be a boolean)
+(false: spaces, true: tabs)</p>
+
+<p>You can always create new html builders with different
+formatting settings. All builders will remain independent
+from each other, just as they should be.</p>
+
+<h3>
+<a id="standard-init-values" class="anchor" href="#standard-init-values" aria-hidden="true"><span class="octicon octicon-link"></span></a>Standard init Values</h3>
+
+<ul>
+<li>
+<em>format</em> = true</li>
+<li>
+<em>indent</em> = 4</li>
+<li>
+<em>use_tabs</em> = false</li>
+</ul>
+
+<h2>
+<a id="motivation-for-h5tk" class="anchor" href="#motivation-for-h5tk" aria-hidden="true"><span class="octicon octicon-link"></span></a>Motivation for h5tk</h2>
+
+<p>On luarocks there is another very similar package called "htk".
+There are some drawbacks with this package</p>
+
+<ul>
+<li>No formatting (The HTML code can not automatically be indentet)</li>
+<li>No support for HTML5 tags</li>
+<li>You can only pass tables of strings to the constructor function.
+h5tk on the other hand, handles every value as expected. You can
+pass functions, tables of functions, tables of tables. All values
+will be reduced (eventually) to a string.</li>
+</ul>
+
+<h2>
+<a id="basic-workings" class="anchor" href="#basic-workings" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic workings</h2>
+
+<pre><code>io.write(h5tk.emit(h5tk.tr{
+    someattr = "attrvalue"
+    h5tk.td{"foo1"},
+    h5tk.td{"foo2"},
+    h5tk.td{"boo3"},
+    h5tk.td{"boo4"}
+}))
+</code></pre>
+
+<p>After the first evaluation step, the table that h5tk.tr gets would
+look like this:</p>
+
+<pre><code>h5tk.emit(h5tk.tr{someattr = "attrvalue", 
+    "&lt;td&gt;foo1&lt;/td&gt;", 
+    "&lt;td&gt;foo2&lt;/td&gt;", 
+    "&lt;td&gt;boo3&lt;/td&gt;", 
+    "&lt;td&gt;boo4&lt;/td&gt;"})
+</code></pre>
+
+<p>Now, since someattr is a string key associated with "attrvalue", 
+the call to h5tk.tr would produce the following code:</p>
+
+<pre><code>&lt;tr someattr="attrvalue"&gt;
+&lt;td&gt;foo1&lt;/td&gt;
+&lt;td&gt;foo2&lt;/th&gt;
+&lt;td&gt;boo3&lt;/th&gt;
+&lt;td&gt;boo4&lt;/td&gt;
+&lt;/tr&gt;
+</code></pre>
+
+<p>This would also work if we hadn't put all attrname = "attrvalue" 
+pairs on top of our table.</p>
+
+<h2>
+<a id="function-evaluation" class="anchor" href="#function-evaluation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Function evaluation</h2>
+
+<p>Lets put some more data in our table.</p>
+
+<pre><code>h5tk.emit(h5tk.tr{someattr = "attrvalue",
+    (function () 
+        return h5tr.td{"funcgenfoo"} 
+    end),
+    h5tr.td{true},
+    {
+        "nested1", 
+        "nested2", 
+        {
+            "subnested1", 
+            "foonested2"
+        }
+    },
+    "foo1", 
+    "foo2", 
+    "boo",  
+    "boo4"
+})
+</code></pre>
+
+<p>Lets tackle this step-by-step!</p>
+
+<ul>
+<li>The function gets evaluated and calls h5tr.td, which, in turn, 
+generates a result table that'll be put into the parent table (h5tk.tr{})</li>
+<li>Pure boolean values will be interpreted as "true" for true and "false" for false</li>
+<li>Sub-tables will act, as if they were not present, meaning that the contained strings or values
+will be put directly into the table that h5tr.tr gets. They also don't have any impact on the
+indentation on the resulting html markup code</li>
+</ul>
+
+<h2>
+<a id="general-type-evaluation" class="anchor" href="#general-type-evaluation" aria-hidden="true"><span class="octicon octicon-link"></span></a>General type evaluation</h2>
+
+<pre><code>h5tk.emit(h5tk.tr{
+    someattr = "attrvalue", =&gt; "someattr="attrvalue""
+    (function () 
+        return h5tr.td{"funcgenfoo"} 
+    end), =&gt; "&lt;td&gt;funcgenfoo&lt;/td&gt;"
+    {"nested1", " nested2", {"snest"}}, =&gt; "nested1 nested2snest"
+    "string", =&gt; "string"
+    nil, =&gt; "nil"
+    true, =&gt; "true"
+    false, =&gt; "false"
+    42 =&gt; "42"
+})
+
+The final result:
+&lt;tr someattr="attrvalue"&gt;
+    &lt;td&gt;
+        funcgenfoo
+    &lt;/td&gt;
+    nested1 nested2snest
+    string
+    nil
+    true
+    false
+    42
+&lt;/tr&gt;
+</code></pre>
+
+<h2>
+<a id="notes" class="anchor" href="#notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notes</h2>
+
+<h3>
+<a id="special-tags" class="anchor" href="#special-tags" aria-hidden="true"><span class="octicon octicon-link"></span></a>Special tags</h3>
+
+<p>Some HTML5-tags have the following syntax:</p>
+
+<pre><code>&lt;tagname attr="attrval" moreattr="attrval" ...&gt;
+</code></pre>
+
+<p>Which means, as you can see, that they don't have an end-tag, 
+and don't enclose text data. h5tk handles these tags correctly.
+For example:</p>
+
+<pre><code>h5tk.img{src = "foo.bar.com"}
+-- creates without and end tag:
+&lt;img src="foo.bar.com"&gt;
+</code></pre>
+
+<p>This is also true for every other tag that acts like this.</p>
+
+<h3>
+<a id="boolean-attributes" class="anchor" href="#boolean-attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Boolean attributes</h3>
+
+<p>The dialog tag can have an boolean attribute which is
+commonly denoted as:</p>
+
+<pre><code>&lt;dialog open&gt; ...
+</code></pre>
+
+<p>While you can't express this with h5tk,</p>
+
+<pre><code>&lt;dialog open=""&gt;
+</code></pre>
+
+<p>means the same thing, which, in fact, you can produce very
+easily. This behaviour will change, though.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">H5tk maintained by <a href="https://github.com/forflo">forflo</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
