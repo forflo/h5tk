@@ -36,6 +36,16 @@ Without further ado, consider the code below.
 * *indent* = 4
 * *use_tabs* = false
 
+## Motivation for h5tk
+On luarocks there is another very similar package called "htk".
+There are some drawbacks with this package
+* No formatting (The HTML code can not automatically be indentet)
+* No support for HTML5 tags
+* You can only pass tables of strings to the constructor function.
+  h5tk on the other hand, handles every value as expected. You can
+  pass functions, tables of functions, tables of tables. All values
+  will be reduced (eventually) to a string.
+
 ## Basic workings
 
 	io.write(h5tk.emit(h5tk.tr{
