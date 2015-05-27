@@ -2,7 +2,7 @@ package = "h5tk"
 version = "2.1-1"
 source = {
 	url = "git://github.com/forflo/h5tk",
-	tag = "v4.1"
+	tag = "v4.2"
 }
 
 description = {

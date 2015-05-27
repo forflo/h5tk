@@ -1,4 +1,5 @@
 local h = loadfile("../h5tk.lua")().init(true)
+local f = loadfile("../h5tk.lua")().init(false)
 
 io.write("<!DOCTYPE html>")
 io.write(h.emit(h.html{
@@ -43,4 +44,9 @@ io.write(h.emit(h.html{
 			end)
 		}
 	}
+}))
+
+io.write("<!DOCTYPE html>")
+io.write(f.emit(f.html{
+	"foo"
 }))

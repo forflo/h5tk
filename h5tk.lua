@@ -1,20 +1,16 @@
--- configuration variables and standards
-local this_format = true
-local this_num_sep = 4
-local this_use_tabs = false
+local pkg_builder
 
 local err_wrong_tag = "Wrong tag has been given!"
 local err_twice_tag = "This bug could not have happened, please report it!"
 
 local buffer_get, buffer_tostring, buffer_add
-local tree_get, tree_addnode, tree_collapse, tree_add_name
 local is_html_normal, is_html_special
+local tree_get, tree_addnode
 local fmt_traverse_attr, fmt_traverse_data
-local fmt_traverse_aux_data, fmt_traverse_aux_attr, fmt_add_sep
+local fmt_traverse_aux_data, fmt_traverse_aux_attr
 local fast_traverse_aux, fast_traverse_attr, fast_traverse_data
 local fmt_helper, fast_helper
-local emit, init
-
+	
 local html_elements_special = {
 	" area base br col embed track hr source param meta img link keygen input ",
 }
@@ -28,7 +24,6 @@ local html_elements_normal = {
 	" sup table tbody td textarea tfoot th thead time title tr u ul var video wbr ",
 }
 
--- string buffer
 function buffer_get()
 	return {""}
 end
@@ -39,10 +34,6 @@ end
 
 function buffer_add(buffer, string)
 	buffer[#buffer + 1] = string
-end
-
-function tree_get()
-	return {}
 end
 
 function is_html_normal(string)
@@ -62,39 +53,12 @@ function is_html_special(string)
 	end	
 end
 
-function tree_collapse(lvl, tree)
-	local bigbuf = buffer_get()
-	local meta = getmetatable(tree)
-
-	for _, v in pairs(tree) do
-		if type(v) == "table" then
-			if meta == nil then
-				buffer_add(bigbuf, tree_collapse(lvl, v))
-			else
-				buffer_add(bigbuf, tree_collapse(lvl + 1, v))
-			end
-		else
-			buffer_add(bigbuf, fmt_add_sep(lvl, v) .. "\n")
-		end
-	end
-
-	return buffer_tostring(bigbuf)
+function tree_get()
+	return {}
 end
 
 function tree_addnode(tree, value)
 	tree[#tree + 1] = value
-end
-
-function fmt_add_sep(lvl, string)
-	local buf = buffer_get()
-	local sep = " "
-	if this_use_tabs then sep = "\t" end
-
-	for i=1,lvl*this_num_sep do
-		buffer_add(buf, sep)
-	end
-	buffer_add(buf, string)
-	return buffer_tostring(buf)
 end
 
 -- auxillary table traversal function
@@ -245,7 +209,7 @@ function fast_traverse_attr(table)
 	return buffer_tostring(attr)
 end
 
-function fmt_helper(tab, sub, html)
+function fmt_helper(sub, html)
 	local tree = tree_get()
 	local n, s = is_html_normal(sub), is_html_special(sub)
 	setmetatable(tree, {"h5tk"})
@@ -264,7 +228,7 @@ function fmt_helper(tab, sub, html)
 	return tree
 end
 
-function fast_helper(tab, sub, html)
+function fast_helper(sub, html)
 	local buf = buffer_get()
 	local n, s = is_html_normal(sub), is_html_special(sub)
 
@@ -282,42 +246,110 @@ function fast_helper(tab, sub, html)
 
 	return buffer_tostring(buf)					
 end
+	
+-- used to encapsulate functions that depend on a
+-- certain configuration
+function logic_builder(format, n_spaces, tabs)
+	local logic  = {}
+	-- configuration variables and standards
+	local this_format = format
+	local this_num_sep = n_spaces
+	local this_use_tabs = tabs 
+	local this_lvl_sep = ""
 
-function emit(tree)
-	if this_format then
-		return tree_collapse(0, tree)
-	else
-		return tree
+	local tree_collapse
+	local fmt_add_sep, fmt_calc_sep
+	local emit
+
+	if type(format) == "boolean" then this_format = format else
+		this_format = true
 	end
+	if type(n_spaces) == "number" then this_num_sep = n_spaces else
+		this_num_sep = 4
+	end
+	if type(tabs) == "boolean" then this_use_tabs = tabs else
+		this_use_tabs = false
+	end
+	
+	function tree_collapse(lvl, tree)
+		local bigbuf = buffer_get()
+		local meta = getmetatable(tree)
+	
+		for _, v in pairs(tree) do
+			if type(v) == "table" then
+				if meta == nil then
+					buffer_add(bigbuf, tree_collapse(lvl, v))
+				else
+					buffer_add(bigbuf, tree_collapse(lvl + 1, v))
+				end
+			else
+				buffer_add(bigbuf, fmt_add_sep(lvl, v) .. "\n")
+			end
+		end
+	
+		return buffer_tostring(bigbuf)
+	end
+	
+	
+	function fmt_add_sep(lvl, string)
+		local buf = buffer_get()
+	
+		for i=1,lvl do
+			buffer_add(buf, this_lvl_sep)
+		end
+		buffer_add(buf, string)
+		return buffer_tostring(buf)
+	end
+	
+	function fmt_calc_sep()
+		local sep = " "
+		local buf = buffer_get()
+		if this_use_tabs then sep = "\t" end
+	
+		for i=1,this_num_sep do
+			buffer_add(buf, sep)
+		end
+		
+		return buffer_tostring(buf)
+	end
+	
+	function emit(tree)
+		if this_format then
+			return tree_collapse(0, tree)
+		else
+			return tree
+		end
+	end
+
+	this_lvl_sep = fmt_calc_sep()
+
+	logic.emit = emit	
+	logic.fast_helper = fast_helper
+	logic.fmt_helper = fmt_helper
+	
+	return logic
 end
 
 function init(format, n_spaces, tabs)
 	local meta = { __index = nil}
+	local logic = logic_builder(format, n_spaces, tabs)
 
-	if type(format) == "boolean" then this_format = format end
-	if type(n_spaces) == "number" then this_num_sep = n_spaces end
-	if type(tabs) == "boolean" then this_use_tabs = tabs end
-
-
-	if this_format == true then
+	if format == true then
 		meta.__index = function(tab, sub)
 			return function(html)
-				return fmt_helper(tab, sub, html)
+				return logic.fmt_helper(sub, html)
 			end
 		end
 	else
 		meta.__index = function(tab, sub)
 			return function(html)
-				return fast_helper(tag, sub, html)
+				return logic.fast_helper(sub, html)
 			end
 		end
 	end
 
 	local h5tk = {
-		emit = emit, 
-		spaces = this_num_sep, 
-		format = this_format,
-		tabs = this_use_tabs,
+		emit = logic.emit, 
 	}
 
 	setmetatable(h5tk, meta)
