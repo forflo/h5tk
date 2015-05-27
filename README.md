@@ -23,12 +23,20 @@ The toolkit even allows you to use tabs instead of spaces!
 ## Initialization
 Without further ado, consider the code below.
 
-	local h5tk = require("h5tk").init(format, indent, use_tabs)
-	-- format toggles formatting of the html code (must be a boolean)
-	-- indent specifies the number of spaces (or tabs) used for each
-	--     indentation level (must be a number)
-	-- use_tabs switches the indentation character (must be a boolean)
-	-- (false: spaces, true: tabs)
+	local builder = require("h5tk")
+	html_builder1 = builder(format, indent, use_tabs)
+	html_builder2 = builder(true, 4, false)
+	html_builder3 = builder(false)
+
+*format* toggles formatting of the html code (must be a boolean)
+*indent* specifies the number of spaces (or tabs) used for each
+    indentation level (must be a number)
+*use_tabs* switches the indentation character (must be a boolean)
+(false: spaces, true: tabs)
+
+You can always create new html builders with different
+formatting settings. All builders will remain independent
+from each other, just as they should be.
 	
 ### Standard init Values
 
