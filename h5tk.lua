@@ -49,19 +49,11 @@ function buffer_add(buffer, string)
 end
 
 function is_html_normal(string)
-	if html_elements_normal[string] then
-		return true
-    else
-	    return false
-    end
+    return html_elements_normal[string] 
 end
 
 function is_html_special(string)
-	if html_elements_special[string] then
-		return true
-	else
-		return false
-	end	
+    return html_elements_special[string]
 end
 
 function tree_get()
