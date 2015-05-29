@@ -11,16 +11,30 @@ local fmt_traverse_aux_data, fmt_traverse_aux_attr
 local fast_traverse_aux, fast_traverse_attr, fast_traverse_data
 local fmt_helper, fast_helper
 	
-local html_elements_special = 
-    " area base br col embed track hr source param meta img link keygen input "
+local html_elements_special = {
+    ["area"] = true, ["base"] = true, ["br"] = true, ["col"] = true, ["embed"] = true, ["track"] = true,
+    ["hr"] = true, ["source"] = true, ["param"] = true, ["meta"] = true, ["img"] = true, ["link"] = true,
+    ["keygen"] = true, input= true
+}
 
-local html_elements_normal = 
-    " a abbr address article aside audio b bdi bdo blockquote body button canvas caption" ..
-    " code colgroup datalist dd del	details dfn dialog div dl dt em fieldset figcaption" ..
-    " figure footer form h1 h2 h3 h4 h5 h6 head header html i iframe ins kbd label legend" ..
-    " li main map mark menu menuitem meter nav noscript object ol optgroup option output" ..
-    " p pre progress q rp rt ruby s samp script section select small span style sub summary" ..
-    " sup table tbody td textarea tfoot th thead time title tr u ul var video wbr "
+local html_elements_normal = {
+    ["a"] = true, ["abbr"] = true, ["address"] = true, ["article"] = true, ["aside"] = true,
+    ["audio"] = true, ["b"] = true, ["bdi"] = true, ["bdo"] = true, ["blockquote"] = true,
+    ["body"] = true, ["button"] = true, ["canvas"] = true, ["caption"] = true, ["code"] = true,
+    ["colgroup"] = true, ["datalist"] = true, ["dd"] = true, ["del"] = true, ["details"] = true,
+    ["dfn"] = true, ["dialog"] = true, ["div"] = true, ["dl"] = true, ["dt"] = true, ["em"] = true,
+    ["fieldset"] = true, ["figcaption"] = true, ["figure"] = true, ["footer"] = true, ["form"] = true,
+    ["h1"] = true, ["h2"] = true, ["h3"] = true, ["h4"] = true, ["h5"] = true, ["h6"] = true, ["head"] = true,
+    ["header"] = true, ["html"] = true, ["i"] = true, ["iframe"] = true, ["ins"] = true, ["kbd"] = true,
+    ["label"] = true, ["legend"] = true, ["li"] = true, ["main"] = true, ["map"] = true, ["mark"] = true,
+    ["menu"] = true, ["menuitem"] = true, ["meter"] = true, ["nav"] = true, ["noscript"] = true, ["object"] = true,
+    ["ol"] = true, ["optgroup"] = true, ["option"] = true, ["output"] = true, ["p"] = true, ["pre"] = true,
+    ["progress"] = true, ["q"] = true, ["rp"] = true, ["rt"] = true, ["ruby"] = true, ["s"] = true, ["samp"] = true,
+    ["script"] = true, ["section"] = true, ["select"] = true, ["small"] = true, ["span"] = true, ["style"] = true,
+    ["sub"] = true, ["summary"] = true, ["sup"] = true, ["table"] = true, ["tbody"] = true, ["td"] = true,
+    ["textarea"] = true, ["tfoot"] = true, ["th"] = true, ["thead"] = true, ["time"] = true, ["title"] = true,
+    ["tr"] = true, ["u"] = true, ["ul"] = true, ["var"] = true, ["video"] = true, ["wbr"] = true
+}
 
 function buffer_get()
 	return {""}
@@ -35,7 +49,7 @@ function buffer_add(buffer, string)
 end
 
 function is_html_normal(string)
-	if string.find(html_elements_normal, " " .. string .. " ") then
+	if html_elements_normal[string] then
 		return true
     else
 	    return false
@@ -43,7 +57,7 @@ function is_html_normal(string)
 end
 
 function is_html_special(string)
-	if string.find(html_elements_special, " " .. string .. " ") then
+	if html_elements_special[string] then
 		return true
 	else
 		return false
