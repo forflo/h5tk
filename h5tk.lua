@@ -276,11 +276,11 @@ function emitter_builder(format, n_spaces, tabs)
 	if type(tabs) == "boolean" then this_use_tabs = tabs else
 		this_use_tabs = false
 	end
-	
+
 	function tree_collapse(lvl, tree)
 		local bigbuf = buffer_get()
 		local meta = getmetatable(tree)
-	
+
 		for _, v in pairs(tree) do
 			if type(v) == "table" then
 				if meta == nil then
@@ -295,8 +295,7 @@ function emitter_builder(format, n_spaces, tabs)
 	
 		return buffer_tostring(bigbuf)
 	end
-	
-	
+
 	function fmt_add_sep(lvl, string)
 		local buf = buffer_get()
 	
@@ -306,7 +305,7 @@ function emitter_builder(format, n_spaces, tabs)
 		buffer_add(buf, string)
 		return buffer_tostring(buf)
 	end
-	
+
 	function fmt_calc_sep()
 		local sep = " "
 		local buf = buffer_get()
@@ -318,7 +317,7 @@ function emitter_builder(format, n_spaces, tabs)
 		
 		return buffer_tostring(buf)
 	end
-	
+
 	function emit(tree)
 		if this_format then
 			return tree_collapse(0, tree)
