@@ -37,6 +37,12 @@ Without further ado, consider the code below.
 You can always create new html builders with different
 formatting settings. All builders will remain independent
 from each other, just as they should be.
+
+Don't worry about the expensiveness of new html_builders. Not
+every function is created redunantly. By far the most functions
+get reused internally. Only functions needing access to the
+format definition will be created as closures. Which, in fact,
+only applies to 3 of about 15.
 	
 ### Standard init Values
 
