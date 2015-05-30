@@ -50,15 +50,16 @@ only applies to 3 of about 15.
 * *indent* = 4
 * *use_tabs* = false
 
-## Motivation for h5tk
-On luarocks there is another very similar package called "htk".
-There are some drawbacks with this package
-* No formatting (The HTML code can not automatically be indentet)
-* No support for HTML5 tags
-* You can only pass tables of strings to the constructor function.
-  h5tk on the other hand, handles every value as expected. You can
-  pass functions, tables of functions, tables of tables. All values
-  will be reduced (eventually) to a string.
+## Why you should use h5tk
+* Formatting with an arbitrary number of tabs or spaces for each indentation level!
+* Supports every HTML5-tag as specified by W3C. It also renders img-Tags or other more special tags correctly
+* H5tk functions handle every argument as expected. You can
+  pass functions, tables of functions, tables of tables, tables of
+  functions that return tables of tables of tables, etc. All values
+  will be reduced to a string.
+* It's very fast! test/perf.lua runs in about 0.65 seconds (non formatting mode). 
+  If you're using luajit, this time is halved down to 0.34 seconds!
+  It's about 35% faster than the other HTML-Toolkit on luarocks (htk)
 
 ## Basic workings
 
