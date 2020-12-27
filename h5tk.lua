@@ -121,22 +121,38 @@ function fmt_traverse_aux_attr(tree)
 	end
 end
 
+-- sort element attributes, in order to achieve identical
+-- output with same input values
+local function sort_attr(tree)
+	local t = {}
+	for k, _ in pairs(tree) do
+		if type(k) == "string" then
+			t[#t+1] = k
+		end
+	end
+	table.sort(t)
+	return t
+end
+
 -- queries all values with string keys and
 -- folds the together to one single string
 -- using fmt_traverse_aux_attr
 function fmt_traverse_attr(tree)
 	local attr = buffer_get()
-
-	for k, v in pairs(tree) do
+	-- ensure alphabetical attribute order
+	local keys = sort_attr(tree)
+	for _, k in ipairs(keys) do
+		local v = tree[k]
 		if type(k) == "string" then
 			buffer_add(attr, " " .. k .. "=\"")
 			buffer_add(attr, fmt_traverse_aux_attr(v))
 			buffer_add(attr, "\"")
 		end
 	end
-	
+
 	return buffer_tostring(attr)
 end
+
 
 function fmt_traverse_data(source)
 	local tree = tree_get()
